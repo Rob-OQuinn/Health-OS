@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health OS</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; color: #f0f0f0; font-family: Arial, sans-serif; font-size: 14px; }
+#app { max-width: 640px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 20px; padding: 14px 0 2px; }
+.sub { font-size: 12px; color: #555; margin-bottom: 14px; }
+#nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0; border-bottom: 1px solid #2a2a2a; margin-bottom: 16px; position: sticky; top: 0; background: #111; z-index: 99; }
+#nav button { padding: 7px 13px; font-size: 12px; border-radius: 20px; border: 1px solid #444; background: #1e1e1e; color: #aaa; cursor: pointer; }
+#nav button.on { background: #f0f0f0; color: #111; border-color: #f0f0f0; font-weight: bold; }
+.page { display: none; }
+.page.on { display: block; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.box { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px; text-align: center; }
+.box .l { font-size: 10px; color: #555; text-transform: uppercase; margin-bottom: 3px; }
+.box .n { font-size: 20px; font-weight: bold; }
+.box .s { font-size: 10px; color: #444; margin-top: 2px; }
+.green { color: #4ade80; }
+.red { color: #f87171; }
+.card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.card h2 { font-size: 14px; color: #ccc; margin-bottom: 12px; }
+.pw { height: 10px; background: #2a2a2a; border-radius: 5px; overflow: hidden; margin: 8px 0; }
+.pb { height: 100%; background: #4ade80; border-radius: 5px; transition: width .3s; }
+.pb.over { background: #f87171; }
+.plbl { display: flex; justify-content: space-between; font-size: 11px; color: #555; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; color: #777; margin-bottom: 5px; }
+.field input, .field select, .field textarea { width: 100%; padding: 10px 12px; font-size: 13px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px; color: #f0f0f0; font-family: Arial, sans-serif; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #666; }
+.field textarea { resize: vertical; }
+.btn { display: block; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; margin-top: 6px; }
+.btn-w { background: #f0f0f0; color: #111; }
+.btn-o { background: transparent; border: 1px solid #444; color: #ccc; }
+.btn:active { opacity: 0.75; }
+.li { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #222; font-size: 13px; gap: 8px; }
+.li:last-child { border-bottom: none; }
+.tag { font-size: 10px; padding: 3px 8px; border-radius: 10px; flex-shrink: 0; }
+.tf { background: #0d2818; color: #86efac; }
+.te { background: #0f1f35; color: #93c5fd; }
+.pg { background: #0d2818; color: #86efac; border: 1px solid #1a4a2a; font-size: 11px; padding: 3px 9px; border-radius: 6px; margin: 2px; display: inline-block; }
+.pr { background: #2d0f0f; color: #fca5a5; border: 1px solid #4a1a1a; font-size: 11px; padding: 3px 9px; border-radius: 6px; margin: 2px; display: inline-block; }
+.pn { background: #2a2a2a; color: #888; border: 1px solid #3a3a3a; font-size: 11px; padding: 3px 9px; border-radius: 6px; margin: 2px; display: inline-block; }
+.aibox { display: none; background: #252525; border: 1px solid #3a3a3a; border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; margin-top: 12px; color: #ddd; }
+.up { border: 2px dashed #3a3a3a; border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; }
+.up:active { background: #1a1a1a; }
+.up .ic { font-size: 30px; margin-bottom: 8px; }
+.up p { font-size: 13px; color: #666; }
+.pimg { display: none; width: 100%; border-radius: 8px; margin-top: 10px; max-height: 220px; object-fit: cover; }
+.mb { padding: 7px 14px; font-size: 12px; border-radius: 20px; border: 1px solid #3a3a3a; background: #252525; color: #777; cursor: pointer; margin: 3px; }
+.mb.on { background: #333; border-color: #888; color: #f0f0f0; }
+.mr { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+.he { padding: 9px 0; border-bottom: 1px solid #222; }
+.he:last-child { border-bottom: none; }
+.ht { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 3px; }
+.rb { font-size: 11px; padding: 2px 8px; border-radius: 8px; font-weight: bold; }
+.rg { background: #0d2818; color: #4ade80; }
+.ro { background: #1a2a10; color: #a3e635; }
+.rm { background: #2a2015; color: #fbbf24; }
+.rb2 { background: #2d1515; color: #f87171; }
+.rt { background: #3d0f0f; color: #ef4444; }
+.kb { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+.kb p { font-size: 11px; color: #555; margin-bottom: 6px; }
+.kb input { width: 100%; padding: 9px 12px; font-size: 12px; background: #252525; border: 1px solid #3a3a3a; border-radius: 6px; color: #f0f0f0; font-family: Arial; }
+.ks { font-size: 11px; color: #4ade80; margin-top: 5px; }
+.empty { color: #555; font-size: 13px; }
+.hint { font-size: 11px; color: #555; margin-top: 6px; }
+.divider { border: none; border-top: 1px solid #2a2a2a; margin: 14px 0; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<h1>Health OS</h1>
+<p class="sub">BMR &middot; Calories &middot; Gut Journal &middot; Body Comp</p>
+
+<div id="nav">
+  <button class="on" onclick="go('dash',this)">Dashboard</button>
+  <button onclick="go('profile',this)">Profile</button>
+  <button onclick="go('food',this)">Food</button>
+  <button onclick="go('exercise',this)">Exercise</button>
+  <button onclick="go('journal',this)">Gut Journal</button>
+  <button onclick="go('body',this)">Body Comp</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash" class="page on">
+  <div class="g3">
+    <div class="box"><div class="l">BMR</div><div class="n" id="db">—</div><div class="s">base kcal</div></div>
+    <div class="box"><div class="l">TDEE</div><div class="n" id="dt">—</div><div class="s">daily</div></div>
+    <div class="box"><div class="l">Target</div><div class="n" id="dg">—</div><div class="s">goal kcal</div></div>
+  </div>
+  <div class="g3">
+    <div class="box"><div class="l">Eaten</div><div class="n" id="de">0</div><div class="s">kcal</div></div>
+    <div class="box"><div class="l">Burned</div><div class="n green" id="dx">0</div><div class="s">exercise</div></div>
+    <div class="box"><div class="l">Remaining</div><div class="n" id="dr">—</div><div class="s" id="drs">&nbsp;</div></div>
+  </div>
+  <div class="card">
+    <div class="plbl"><span>Progress today</span><span id="pl">—</span></div>
+    <div class="pw"><div class="pb" id="pb" style="width:0%"></div></div>
+    <div class="hint" id="ph">Set up your profile to see calorie targets.</div>
+  </div>
+  <div class="card">
+    <h2>Today's log</h2>
+    <div id="tlog"><p class="empty">Nothing logged yet.</p></div>
+  </div>
+  <div class="card">
+    <h2>Macros today</h2>
+    <div id="macros" style="font-size:13px;color:#666">Log food to see macros.</div>
+  </div>
+  <div class="card" id="gc" style="display:none">
+    <h2>Gut health insights</h2>
+    <div id="gi"></div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="page">
+  <div class="card">
+    <h2>Body metrics</h2>
+    <div class="field"><label>Weight (lbs)</label><input type="number" id="pw" placeholder="e.g. 185"></div>
+    <div class="field"><label>Height (inches) — 5'10" = 70</label><input type="number" id="ph2" placeholder="e.g. 70"></div>
+    <div class="field"><label>Age</label><input type="number" id="pa" placeholder="e.g. 32"></div>
+    <div class="field"><label>Biological sex</label><select id="ps"><option value="male">Male</option><option value="female">Female</option></select></div>
+    <div class="field"><label>Body fat % (optional — enables Katch-McArdle)</label><input type="number" id="pbf" placeholder="e.g. 18"></div>
+  </div>
+  <div class="card">
+    <h2>Activity level</h2>
+    <div class="field"><select id="pact">
+      <option value="1.2">Sedentary — desk job, little movement</option>
+      <option value="1.375">Lightly active — exercise 1-3x/week</option>
+      <option value="1.55" selected>Moderately active — exercise 3-5x/week</option>
+      <option value="1.725">Very active — hard training 6-7x/week</option>
+      <option value="1.9">Extra active — physical job + daily training</option>
+    </select></div>
+  </div>
+  <div class="card">
+    <h2>Goal</h2>
+    <div class="field"><select id="pg">
+      <option value="-500">Lose fat — 500 kcal/day deficit</option>
+      <option value="-250">Slow cut — 250 kcal/day deficit</option>
+      <option value="0" selected>Maintain weight</option>
+      <option value="250">Lean bulk — 250 kcal surplus</option>
+      <option value="500">Build muscle — 500 kcal surplus</option>
+    </select></div>
+  </div>
+  <button class="btn btn-w" onclick="savePro()">Save &amp; Calculate BMR</button>
+  <div id="bres" style="display:none;margin-top:14px;font-size:13px;color:#888;line-height:2"></div>
+</div>
+
+<!-- FOOD -->
+<div id="food" class="page">
+  <div class="kb">
+    <p>Anthropic API key — needed for AI photo analysis</p>
+    <input type="password" id="k1" placeholder="sk-ant-api03-..." oninput="sk('k1')">
+    <div class="ks" id="ks1" style="display:none">Saved</div>
+  </div>
+  <div class="card">
+    <h2>Photo analysis</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px">Snap your meal — AI estimates calories, macros, and flags gut-friendly or harmful ingredients.</p>
+    <div class="up" onclick="document.getElementById('fi').click()">
+      <div class="ic">📷</div><p>Tap to choose a meal photo</p>
+    </div>
+    <input type="file" id="fi" accept="image/*" style="display:none" onchange="loadFood(event)">
+    <img id="fp" class="pimg">
+    <button class="btn btn-w" id="fab" onclick="runFoodAI()" style="display:none;margin-top:10px">Analyze Meal with AI</button>
+    <div id="ff2" style="display:none;margin-top:10px">
+      <div style="font-size:11px;color:#555;margin-bottom:5px">Gut signals:</div>
+      <div id="fpills"></div>
+    </div>
+    <div class="aibox" id="fai"></div>
+    <div id="fform" style="display:none">
+      <div class="divider"></div>
+      <div class="field"><label>Meal name</label><input type="text" id="ffn" placeholder="e.g. Grilled salmon and rice"></div>
+      <div class="field"><label>Calories</label><input type="number" id="ffc"></div>
+      <div class="field"><label>Protein (g)</label><input type="number" id="ffp"></div>
+      <div class="field"><label>Carbs (g)</label><input type="number" id="ffca"></div>
+      <div class="field"><label>Fat (g)</label><input type="number" id="fff"></div>
+      <button class="btn btn-w" onclick="addAI()">Add to Today's Log</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Manual entry</h2>
+    <div class="field"><label>Food name</label><input type="text" id="mn" placeholder="e.g. Oatmeal with banana"></div>
+    <div class="field"><label>Calories</label><input type="number" id="mc"></div>
+    <div class="field"><label>Protein (g)</label><input type="number" id="mp"></div>
+    <div class="field"><label>Carbs (g)</label><input type="number" id="mca"></div>
+    <div class="field"><label>Fat (g)</label><input type="number" id="mf"></div>
+    <button class="btn btn-w" onclick="addMan()">Add to Log</button>
+  </div>
+</div>
+
+<!-- EXERCISE -->
+<div id="exercise" class="page">
+  <div class="kb">
+    <p>Anthropic API key — needed for AI questions</p>
+    <input type="password" id="k2" placeholder="sk-ant-api03-..." oninput="sk('k2')">
+  </div>
+  <div class="card">
+    <h2>Log exercise</h2>
+    <div class="field"><label>Activity</label>
+      <select id="et">
+        <option value="">-- Choose --</option>
+        <option value="walking">Walking (3.5 mph)</option>
+        <option value="running">Running (6 mph)</option>
+        <option value="cycling">Cycling — moderate</option>
+        <option value="weightlifting">Weightlifting</option>
+        <option value="hiit">HIIT</option>
+        <option value="swimming">Swimming</option>
+        <option value="yoga">Yoga / stretching</option>
+        <option value="slow_walk">Slow walk — ulcer-friendly</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Duration (minutes)</label><input type="number" id="ed" placeholder="e.g. 45"></div>
+    <div class="field"><label>Label (optional)</label><input type="text" id="el" placeholder="e.g. Morning run, leg day"></div>
+    <button class="btn btn-w" onclick="addEx()">Log Exercise</button>
+    <p class="hint">Burn estimate uses your profile weight + MET values.</p>
+  </div>
+  <div class="card">
+    <h2>Ask the AI</h2>
+    <div class="field"><textarea id="eq" rows="3" placeholder="e.g. What workouts are safe with an ulcer? How do I build muscle in a calorie deficit?"></textarea></div>
+    <button class="btn btn-o" onclick="askEx()">Ask AI</button>
+    <div class="aibox" id="eai"></div>
+  </div>
+</div>
+
+<!-- GUT JOURNAL -->
+<div id="journal" class="page">
+  <div class="kb">
+    <p>Anthropic API key — needed for AI pattern analysis</p>
+    <input type="password" id="k3" placeholder="sk-ant-api03-..." oninput="sk('k3')">
+  </div>
+  <div class="card">
+    <h2>New entry</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px">Log how each meal makes you feel. Patterns auto-surface on your dashboard.</p>
+    <div class="field"><label>What did you eat?</label><input type="text" id="jf" placeholder="e.g. Coffee and buttered toast"></div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:#777;margin-bottom:6px">How did it make you feel?</div>
+      <div class="mr" id="mr1">
+        <button class="mb" onclick="pm('great',this)">Great</button>
+        <button class="mb" onclick="pm('ok',this)">OK</button>
+        <button class="mb" onclick="pm('meh',this)">Meh</button>
+        <button class="mb" onclick="pm('bad',this)">Bad</button>
+        <button class="mb" onclick="pm('terrible',this)">Terrible</button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:#777;margin-bottom:6px">Symptoms — tap all that apply</div>
+      <div class="mr" id="mr2">
+        <button class="mb" onclick="ts('bloating',this)">Bloating</button>
+        <button class="mb" onclick="ts('acid reflux',this)">Acid reflux</button>
+        <button class="mb" onclick="ts('stomach pain',this)">Stomach pain</button>
+        <button class="mb" onclick="ts('nausea',this)">Nausea</button>
+        <button class="mb" onclick="ts('burning',this)">Burning</button>
+        <button class="mb" onclick="ts('energy crash',this)">Energy crash</button>
+        <button class="mb" onclick="ts('energy boost',this)">Energy boost</button>
+        <button class="mb" onclick="ts('good digestion',this)">Good digestion</button>
+        <button class="mb" onclick="ts('none',this)">None</button>
+      </div>
+    </div>
+    <div class="field"><label>Notes</label><input type="text" id="jn" placeholder="e.g. Pain started 2 hours later"></div>
+    <div class="field"><label>Time eaten</label><input type="time" id="jt"></div>
+    <button class="btn btn-w" onclick="saveJ()">Save Entry</button>
+  </div>
+  <div class="card">
+    <h2>Journal history</h2>
+    <div id="jlist"><p class="empty">No entries yet.</p></div>
+    <button class="btn btn-o" onclick="runJAI()" style="margin-top:12px">Get AI Pattern Analysis</button>
+    <div class="aibox" id="jai"></div>
+  </div>
+</div>
+
+<!-- BODY COMP -->
+<div id="body" class="page">
+  <div class="kb">
+    <p>Anthropic API key — needed for AI body analysis</p>
+    <input type="password" id="k4" placeholder="sk-ant-api03-..." oninput="sk('k4')">
+  </div>
+  <div class="card">
+    <h2>Progress photo analysis</h2>
+    <div class="up" onclick="document.getElementById('bi').click()">
+      <div class="ic">📸</div><p>Tap to upload a progress photo</p>
+    </div>
+    <input type="file" id="bi" accept="image/*" style="display:none" onchange="loadBody(event)">
+    <img id="bp" class="pimg">
+    <button class="btn btn-w" id="bab" onclick="runBodyAI()" style="display:none;margin-top:10px">Analyze Body Comp with AI</button>
+    <div class="aibox" id="bai"></div>
+  </div>
+  <div class="card">
+    <h2>Manual measurements</h2>
+    <div class="field"><label>Weight (lbs)</label><input type="number" id="bw" placeholder="current weight"></div>
+    <div class="field"><label>Body fat %</label><input type="number" id="bbf" placeholder="if known"></div>
+    <div class="field"><label>Waist (inches)</label><input type="number" id="bwa" placeholder="at navel"></div>
+    <div class="field"><label>Notes</label><input type="text" id="bn" placeholder="morning, post-workout, etc."></div>
+    <button class="btn btn-w" onclick="saveBody()">Save Measurements</button>
+  </div>
+  <div class="card" id="bhc" style="display:none">
+    <h2>Measurement history</h2>
+    <div id="bhist"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+<script>
+var S = JSON.parse(localStorage.getItem('hos4') || 'null') || { p:{}, food:[], ex:[], j:[], body:[] };
+var mood = null, syms = [], fb64 = null, bb64 = null;
+function sv() { localStorage.setItem('hos4', JSON.stringify(S)); }
+
+function gk() { return localStorage.getItem('hk') || ''; }
+function sk(id) {
+  var v = document.getElementById(id).value.trim();
+  if (v) { localStorage.setItem('hk', v); syncKeys(); }
+}
+function syncKeys() {
+  var k = gk(); if (!k) return;
+  ['k1','k2','k3','k4'].forEach(function(id) { var e = document.getElementById(id); if (e && !e.value) e.value = k; });
+}
+
+function go(id, btn) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
+  document.querySelectorAll('#nav button').forEach(function(b) { b.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+  if (id === 'dash') rDash();
+  if (id === 'journal') rJ();
+  if (id === 'body') rBH();
+  syncKeys();
+}
+
+function savePro() {
+  var w = parseFloat(document.getElementById('pw').value);
+  var h = parseFloat(document.getElementById('ph2').value);
+  var a = parseFloat(document.getElementById('pa').value);
+  var s = document.getElementById('ps').value;
+  var bf = parseFloat(document.getElementById('pbf').value) || 0;
+  var act = parseFloat(document.getElementById('pact').value);
+  var goal = parseInt(document.getElementById('pg').value);
+  if (!w || !h || !a) { alert('Please enter weight, height, and age.'); return; }
+  var wkg = w * 0.453592, hcm = h * 2.54, bmr;
+  if (bf > 0) { bmr = 370 + 21.6 * wkg * (1 - bf / 100); }
+  else { bmr = s === 'male' ? 10*wkg + 6.25*hcm - 5*a + 5 : 10*wkg + 6.25*hcm - 5*a - 161; }
+  bmr = Math.round(bmr);
+  var tdee = Math.round(bmr * act), tgt = tdee + goal;
+  S.p = { w:w, h:h, a:a, s:s, bf:bf, act:act, goal:goal, bmr:bmr, tdee:tdee, tgt:tgt };
+  sv();
+  var el = document.getElementById('bres');
+  el.style.display = 'block';
+  el.innerHTML = 'Formula: ' + (bf > 0 ? 'Katch-McArdle' : 'Mifflin-St Jeor') + '<br>' +
+    'BMR: <b style="color:#f0f0f0">' + bmr.toLocaleString() + ' kcal/day</b><br>' +
+    'TDEE: <b style="color:#f0f0f0">' + tdee.toLocaleString() + ' kcal/day</b><br>' +
+    'Daily target: <b style="color:#4ade80">' + tgt.toLocaleString() + ' kcal/day</b><br>' +
+    '<span style="color:#444;font-size:11px">Saved — go to Dashboard.</span>';
+  rDash();
+}
+
+function tday(arr) { var t = new Date().toDateString(); return arr.filter(function(x) { return new Date(x.ts).toDateString() === t; }); }
+
+function rDash() {
+  var p = S.p; if (!p.bmr) return;
+  document.getElementById('db').textContent = p.bmr.toLocaleString();
+  document.getElementById('dt').textContent = p.tdee.toLocaleString();
+  document.getElementById('dg').textContent = p.tgt.toLocaleString();
+  var tf = tday(S.food), te = tday(S.ex);
+  var eaten = Math.round(tf.reduce(function(s,x) { return s+x.c; }, 0));
+  var burned = Math.round(te.reduce(function(s,x) { return s+x.c; }, 0));
+  var rem = p.tgt - eaten + burned;
+  document.getElementById('de').textContent = eaten.toLocaleString();
+  document.getElementById('dx').textContent = burned.toLocaleString();
+  document.getElementById('dr').textContent = Math.abs(rem).toLocaleString();
+  document.getElementById('dr').className = 'n ' + (rem >= 0 ? 'green' : 'red');
+  document.getElementById('drs').textContent = rem >= 0 ? 'remaining' : 'over';
+  var pct = Math.min(Math.round(eaten / p.tgt * 100), 100);
+  var bar = document.getElementById('pb');
+  bar.style.width = pct + '%';
+  bar.className = 'pb' + (eaten > p.tgt ? ' over' : '');
+  document.getElementById('pl').textContent = eaten.toLocaleString() + ' / ' + p.tgt.toLocaleString() + ' kcal';
+  document.getElementById('ph').textContent = 'Target: ' + p.tgt.toLocaleString() + ' kcal (TDEE ' + p.tdee.toLocaleString() + (p.goal > 0 ? ' +' + p.goal : p.goal < 0 ? ' ' + p.goal : '') + ')';
+  rLog(tf, te);
+  rMac(tf);
+  rGut();
+}
+
+function rLog(tf, te) {
+  var all = [];
+  tf.forEach(function(x) { all.push({ name:x.name, c:x.c, k:'food', ts:x.ts }); });
+  te.forEach(function(x) { all.push({ name:x.name, c:x.c, k:'ex', ts:x.ts }); });
+  all.sort(function(a,b) { return a.ts - b.ts; });
+  var el = document.getElementById('tlog');
+  if (!all.length) { el.innerHTML = '<p class="empty">Nothing logged yet.</p>'; return; }
+  el.innerHTML = all.map(function(x) {
+    return '<div class="li"><div style="display:flex;gap:8px;align-items:center;flex:1;min-width:0">' +
+      '<span class="tag ' + (x.k === 'food' ? 'tf' : 'te') + '">' + x.k + '</span>' +
+      '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + x.name + '</span></div>' +
+      '<span style="font-weight:bold;color:' + (x.k === 'food' ? '#f0f0f0' : '#4ade80') + ';white-space:nowrap">' +
+      (x.k === 'food' ? '+' : '-') + x.c + ' kcal</span></div>';
+  }).join('');
+}
+
+function rMac(tf) {
+  var p = Math.round(tf.reduce(function(s,x) { return s+(x.p||0); }, 0));
+  var c = Math.round(tf.reduce(function(s,x) { return s+(x.ca||0); }, 0));
+  var f = Math.round(tf.reduce(function(s,x) { return s+(x.f||0); }, 0));
+  document.getElementById('macros').innerHTML =
+    '<span style="color:#4ade80">Protein: '+p+'g</span> &nbsp; <span style="color:#60a5fa">Carbs: '+c+'g</span> &nbsp; <span style="color:#f87171">Fat: '+f+'g</span>';
+}
+
+function rGut() {
+  var j = S.j; if (!j.length) { document.getElementById('gc').style.display = 'none'; return; }
+  document.getElementById('gc').style.display = 'block';
+  var good = j.filter(function(e) { return e.mood === 'great' || e.mood === 'ok'; });
+  var bad = j.filter(function(e) { return e.mood === 'bad' || e.mood === 'terrible'; });
+  var gf = [], bf2 = [];
+  good.forEach(function(e) { if (e.food && gf.indexOf(e.food) < 0) gf.push(e.food); });
+  bad.forEach(function(e) { if (e.food && bf2.indexOf(e.food) < 0) bf2.push(e.food); });
+  gf = gf.slice(0,4); bf2 = bf2.slice(0,4);
+  var freq = {};
+  j.forEach(function(e) { (e.syms||[]).forEach(function(s) { if (s!=='none'&&s!=='energy boost'&&s!=='good digestion') freq[s]=(freq[s]||0)+1; }); });
+  var topS = Object.keys(freq).sort(function(a,b) { return freq[b]-freq[a]; }).slice(0,3);
+  var h = '';
+  if (gf.length) h += '<div style="margin-bottom:10px"><div style="font-size:10px;color:#555;text-transform:uppercase;margin-bottom:5px">Foods that agree with you</div>' + gf.map(function(f) { return '<span class="pg">&#10003; '+f+'</span>'; }).join('') + '</div>';
+  if (bf2.length) h += '<div style="margin-bottom:10px"><div style="font-size:10px;color:#555;text-transform:uppercase;margin-bottom:5px">Watch or avoid</div>' + bf2.map(function(f) { return '<span class="pr">&#9888; '+f+'</span>'; }).join('') + '</div>';
+  if (topS.length) h += '<div><div style="font-size:10px;color:#555;text-transform:uppercase;margin-bottom:5px">Common symptoms</div>' + topS.map(function(s) { return '<span class="pn">'+s+' ('+freq[s]+'x)</span>'; }).join('') + '</div>';
+  document.getElementById('gi').innerHTML = h || '<p class="empty">Log more entries to surface patterns.</p>';
+}
+
+function loadFood(e) {
+  var file = e.target.files[0]; if (!file) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var img = document.getElementById('fp');
+    img.src = ev.target.result; img.style.display = 'block';
+    fb64 = ev.target.result.split(',')[1];
+    document.getElementById('fab').style.display = 'block';
+  }; r.readAsDataURL(file);
+}
+
+function callAPI(key, body, cb) {
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify(body)
+  }).then(function(r) { return r.json(); }).then(cb).catch(function(e) { cb({ error: { message: e.message } }); });
+}
+
+function runFoodAI() {
+  var key = gk(); if (!key) { alert('Enter your Anthropic API key above.'); return; }
+  if (!fb64) return;
+  var btn = document.getElementById('fab'), box = document.getElementById('fai');
+  btn.textContent = 'Analyzing...'; btn.disabled = true;
+  box.style.display = 'block'; box.textContent = 'Reading your meal...';
+  callAPI(key, {
+    model: 'claude-sonnet-4-6', max_tokens: 700,
+    messages: [{ role:'user', content: [
+      { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:fb64 } },
+      { type:'text', text:'You are a clinical nutritionist and gut health specialist. Analyze this meal photo.\n\nRespond in EXACTLY this format:\n\nMEAL: [what you see]\nCALORIES: [number] kcal\nPROTEIN: [number]g\nCARBS: [number]g\nFAT: [number]g\n\nGUT ANALYSIS:\nGOOD_FOR_GUT: [comma list of gut-beneficial items — e.g. ginger, oats, leafy greens, salmon, turmeric, yogurt, banana. Write "none" if none]\nWATCH_OR_AVOID: [comma list of gut irritants — e.g. coffee, spicy peppers, citrus, fried items, tomato sauce. Write "none" if none]\n\nNOTES: [2-3 sentences on gut-friendliness and one tip for someone managing ulcer-like symptoms]' }
+    ]}]
+  }, function(d) {
+    if (d.error) { box.textContent = 'Error: ' + d.error.message; btn.textContent = 'Analyze Meal with AI'; btn.disabled = false; return; }
+    var text = d.content[0].text;
+    box.textContent = text;
+    var cM = text.match(/CALORIES:\s*(\d+)/i), pM = text.match(/PROTEIN:\s*(\d+)/i);
+    var caM = text.match(/CARBS:\s*(\d+)/i), fM = text.match(/FAT:\s*(\d+)/i);
+    var nM = text.match(/MEAL:\s*(.+)/i), gM = text.match(/GOOD_FOR_GUT:\s*(.+)/i), wM = text.match(/WATCH_OR_AVOID:\s*(.+)/i);
+    if (gM || wM) {
+      document.getElementById('ff2').style.display = 'block';
+      var pills = '';
+      if (gM) gM[1].split(',').forEach(function(s) { s=s.trim(); if(s&&s.toLowerCase()!=='none') pills+='<span class="pg">&#10003; '+s+'</span>'; });
+      if (wM) wM[1].split(',').forEach(function(s) { s=s.trim(); if(s&&s.toLowerCase()!=='none') pills+='<span class="pr">&#9888; '+s+'</span>'; });
+      document.getElementById('fpills').innerHTML = pills;
+    }
+    if (cM) {
+      document.getElementById('ffn').value = nM ? nM[1].trim() : 'Meal';
+      document.getElementById('ffc').value = cM[1];
+      document.getElementById('ffp').value = pM ? pM[1] : '';
+      document.getElementById('ffca').value = caM ? caM[1] : '';
+      document.getElementById('fff').value = fM ? fM[1] : '';
+      document.getElementById('fform').style.display = 'block';
+    }
+    btn.textContent = 'Analyze Meal with AI'; btn.disabled = false;
+  });
+}
+
+function addAI() {
+  var name = document.getElementById('ffn').value.trim();
+  var c = parseFloat(document.getElementById('ffc').value) || 0;
+  if (!name || !c) { alert('Name and calories required.'); return; }
+  S.food.push({ name:name, c:c, p:parseFloat(document.getElementById('ffp').value)||0, ca:parseFloat(document.getElementById('ffca').value)||0, f:parseFloat(document.getElementById('fff').value)||0, ts:Date.now() });
+  sv();
+  document.getElementById('fform').style.display = 'none';
+  document.getElementById('fai').style.display = 'none';
+  document.getElementById('ff2').style.display = 'none';
+  document.getElementById('fp').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+  fb64 = null;
+  alert('Added: ' + name + ' — ' + c + ' kcal');
+}
+
+function addMan() {
+  var name = document.getElementById('mn').value.trim();
+  var c = parseFloat(document.getElementById('mc').value) || 0;
+  if (!name || !c) { alert('Enter food name and calories.'); return; }
+  S.food.push({ name:name, c:c, p:parseFloat(document.getElementById('mp').value)||0, ca:parseFloat(document.getElementById('mca').value)||0, f:parseFloat(document.getElementById('mf').value)||0, ts:Date.now() });
+  sv();
+  ['mn','mc','mp','mca','mf'].forEach(function(id) { document.getElementById(id).value=''; });
+  alert('Added: ' + name + ' — ' + c + ' kcal');
+}
+
+var MET = { walking:3.5, running:9.8, cycling:6.8, weightlifting:3.5, hiit:8, swimming:7, yoga:2.5, slow_walk:2.5, other:4 };
+function addEx() {
+  var type = document.getElementById('et').value, dur = parseFloat(document.getElementById('ed').value);
+  var lbl = document.getElementById('el').value.trim() || type, w = S.p.w || 170;
+  if (!type || !dur) { alert('Choose an activity and enter duration.'); return; }
+  var c = Math.round((MET[type]||4) * w * 0.453592 * (dur/60));
+  S.ex.push({ name:lbl, c:c, ts:Date.now() }); sv();
+  document.getElementById('et').value = '';
+  document.getElementById('ed').value = '';
+  document.getElementById('el').value = '';
+  alert('Logged: ~' + c + ' kcal burned in ' + dur + ' min');
+}
+
+function askEx() {
+  var key = gk(); if (!key) { alert('Enter your API key above.'); return; }
+  var q = document.getElementById('eq').value.trim(); if (!q) return;
+  var box = document.getElementById('eai'); box.style.display = 'block'; box.textContent = 'Thinking...';
+  var p = S.p, ctx = p.w ? 'User: '+p.w+'lbs, age '+(p.a||'?')+'. Has ulcer-like symptoms.' : 'User has ulcer-like symptoms.';
+  callAPI(key, { model:'claude-sonnet-4-6', max_tokens:400, messages:[{ role:'user', content:ctx+'\n\nQuestion: '+q+'\n\nBe specific, practical, and gut-health-aware.' }] },
+    function(d) { box.textContent = d.error ? 'Error: '+d.error.message : d.content[0].text; });
+}
+
+function pm(v, btn) {
+  mood = v;
+  document.querySelectorAll('#mr1 .mb').forEach(function(b) { b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+
+function ts(v, btn) {
+  if (v === 'none') { syms = ['none']; document.querySelectorAll('#mr2 .mb').forEach(function(b) { b.classList.remove('on'); }); btn.classList.add('on'); return; }
+  syms = syms.filter(function(s) { return s !== 'none'; });
+  var i = syms.indexOf(v);
+  if (i >= 0) { syms.splice(i,1); btn.classList.remove('on'); } else { syms.push(v); btn.classList.add('on'); }
+  document.querySelectorAll('#mr2 .mb').forEach(function(b) { if (b.textContent==='None') b.classList.remove('on'); });
+}
+
+function saveJ() {
+  var food = document.getElementById('jf').value.trim();
+  if (!food) { alert('Enter what you ate.'); return; }
+  if (!mood) { alert('Select how it made you feel.'); return; }
+  S.j.push({ food:food, mood:mood, syms:syms.slice(), notes:document.getElementById('jn').value, time:document.getElementById('jt').value, ts:Date.now() });
+  sv(); mood = null; syms = [];
+  document.querySelectorAll('#mr1 .mb,#mr2 .mb').forEach(function(b) { b.classList.remove('on'); });
+  ['jf','jn','jt'].forEach(function(id) { document.getElementById(id).value=''; });
+  rJ(); alert('Entry saved!');
+}
+
+var RC = { great:'rg', ok:'ro', meh:'rm', bad:'rb2', terrible:'rt' };
+function rJ() {
+  var el = document.getElementById('jlist'), entries = S.j.slice().reverse().slice(0,30);
+  if (!entries.length) { el.innerHTML = '<p class="empty">No entries yet.</p>'; return; }
+  el.innerHTML = entries.map(function(e) {
+    var sh = (e.syms&&e.syms.length&&e.syms[0]!=='none') ? '<div style="margin:3px 0">' + e.syms.map(function(s) { return '<span class="pn" style="font-size:10px">'+s+'</span>'; }).join('') + '</div>' : '';
+    var nh = e.notes ? '<div style="color:#666;font-size:12px;margin-top:2px">'+e.notes+'</div>' : '';
+    return '<div class="he"><div class="ht"><b style="font-size:14px">'+e.food+'</b><span class="rb '+(RC[e.mood]||'rm')+'">'+e.mood+'</span><span style="font-size:11px;color:#444">'+new Date(e.ts).toLocaleDateString()+(e.time?' &middot; '+e.time:'')+'</span></div>'+sh+nh+'</div>';
+  }).join('');
+}
+
+function runJAI() {
+  var key = gk(); if (!key) { alert('Enter your API key above.'); return; }
+  if (!S.j.length) { alert('Add journal entries first.'); return; }
+  var box = document.getElementById('jai'); box.style.display = 'block'; box.textContent = 'Analyzing your gut journal...';
+  var sum = S.j.slice(-15).map(function(e) { return e.food+' → '+e.mood+(e.syms.length?' ('+e.syms.join(', ')+')':'')+(e.notes?' — '+e.notes:''); }).join('\n');
+  callAPI(key, { model:'claude-sonnet-4-6', max_tokens:500, messages:[{ role:'user', content:'You are a gut health specialist. Analyze:\n\n'+sum+'\n\n1. Foods that consistently cause problems\n2. Foods that agree with this person\n3. Patterns or timing observations\n4. Three specific dietary recommendations for ulcer-like symptoms\n5. One encouraging note\n\nBe direct and specific.' }] },
+    function(d) { box.textContent = d.error ? 'Error: '+d.error.message : d.content[0].text; });
+}
+
+function loadBody(e) {
+  var file = e.target.files[0]; if (!file) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var img = document.getElementById('bp');
+    img.src = ev.target.result; img.style.display = 'block';
+    bb64 = ev.target.result.split(',')[1];
+    document.getElementById('bab').style.display = 'block';
+  }; r.readAsDataURL(file);
+}
+
+function runBodyAI() {
+  var key = gk(); if (!key) { alert('Enter your API key above.'); return; }
+  if (!bb64) return;
+  var btn = document.getElementById('bab'), box = document.getElementById('bai');
+  btn.textContent = 'Analyzing...'; btn.disabled = true;
+  box.style.display = 'block'; box.textContent = 'Analyzing body composition...';
+  callAPI(key, { model:'claude-sonnet-4-6', max_tokens:500, messages:[{ role:'user', content:[
+    { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:bb64 } },
+    { type:'text', text:'Body composition assessment:\n1. Estimated body fat % range\n2. Muscle definition notes by area\n3. What is visibly improving\n4. One focus area for next 4 weeks\n5. Honest encouraging overall assessment\n\nBe professional, specific, constructive.' }
+  ]}] }, function(d) {
+    if (d.error) { box.textContent = 'Error: '+d.error.message; }
+    else {
+      var text = d.content[0].text; box.textContent = text;
+      var m = text.match(/(\d+)[–\-](\d+)%/) || text.match(/(\d+)\s*%/);
+      if (m) document.getElementById('bbf').value = m[1];
+    }
+    btn.textContent = 'Analyze Body Comp with AI'; btn.disabled = false;
+  });
+}
+
+function saveBody() {
+  var w = parseFloat(document.getElementById('bw').value)||null;
+  var bf = parseFloat(document.getElementById('bbf').value)||null;
+  var wa = parseFloat(document.getElementById('bwa').value)||null;
+  var n = document.getElementById('bn').value;
+  if (!w && !bf) { alert('Enter at least weight or body fat %.'); return; }
+  S.body.push({ w:w, bf:bf, wa:wa, n:n, ts:Date.now() });
+  if (w) S.p.w = w; if (bf) S.p.bf = bf;
+  sv(); rBH();
+  ['bw','bbf','bwa','bn'].forEach(function(id) { document.getElementById(id).value=''; });
+  alert('Saved!');
+}
+
+function rBH() {
+  var card = document.getElementById('bhc');
+  if (!S.body.length) { card.style.display='none'; return; }
+  card.style.display = 'block';
+  document.getElementById('bhist').innerHTML = S.body.slice().reverse().slice(0,10).map(function(e) {
+    return '<div class="li"><div>'+new Date(e.ts).toLocaleDateString()+(e.n?' — '+e.n:'')+'</div><div style="font-size:12px;color:#666">'+(e.w?e.w+' lbs ':'')+(e.bf?'· '+e.bf+'% BF ':'')+(e.wa?'· '+e.wa+'"':'')+'</div></div>';
+  }).join('');
+}
+
+syncKeys(); rDash();
+</script>
+</body>
+</html>
